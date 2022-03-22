@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Shraddha-Naidu/tinyapp1/issues"
   },
-  "homepage": "https://github.com/Shraddha-Naidu/tinyapp1#readme"
+  "homepage": "https://github.com/Shraddha-Naidu/tinyapp1#readme",
+  "dependencies": {
+    "express": "^4.17.3"
+  }
 }
