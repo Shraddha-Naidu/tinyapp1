@@ -7,6 +7,9 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 
+/* MIDDLEWARE */
+app.use(morgan("combined"))
+
 /* VARIABLE */
 
 const urlDatabase = {
@@ -37,23 +40,26 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+//HTML test code
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-
+//Server endpoint
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+//Retrieves urls
+app.get("/urls", (req, res) => {
+  let templateVars = { urls: urlDatabase };
+  res.render('urls_index', templateVars);
+});
+
+//Retrieves short urls
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
-});
-
-app.get("/u/:shortURL", (req, res) => {
-  // const longURL = ...
-  res.redirect(longURL);
 });
 
 
