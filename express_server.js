@@ -56,17 +56,29 @@ app.get("/urls", (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+});
+
 //Retrieves short urls
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
 
+//Route to new URLs
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
 
-app.post("/urls", (req, res) => {
+app.post("/urls/new", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
+
+
+
 
 //Removes deleted URL
 app.post("/urls/:shortURL/delete", (req, res) => {
