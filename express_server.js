@@ -7,6 +7,7 @@ const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 /* MIDDLEWARE */
 app.use(morgan("combined"))
@@ -66,7 +67,10 @@ app.get("/urls.json", (req, res) => {
 
 //Retrieves URL index(response to /urls)
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render('urls_index', templateVars);
 });
 
@@ -134,7 +138,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //LOGIN route
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
+  const username = req.body.username;
+  res.cookie("username", username);
   res.redirect("/urls");
 });
 

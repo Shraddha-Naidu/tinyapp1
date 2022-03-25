@@ -30,12 +30,12 @@
             <td><%= urls[url] %></td>
             <td>
               <form method="GET" action="/urls/<%= url %>/">
-                <button type="button" style="background-color: white; color: black; border-color: black; border-radius: 4px"class="btn btn-primary">EDIT</button>
+                <button type="edit" style="background-color: white; color: black; border-color: black; border-radius: 4px"class="btn btn-primary">EDIT</button>
               </form>
             </td>
             <td>
               <form method="POST" action="/urls/<%= url %>/delete">
-                <button type="button" style="background-color: white; color: red; border-color: red; border-radius: 4px"class="btn btn-primary">DELETE</button>
+                <button type="delete" style="background-color: white; color: red; border-color: red; border-radius: 4px"class="btn btn-primary">DELETE</button>
               </form>
             </td>
           </tr>
