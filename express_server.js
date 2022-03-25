@@ -19,7 +19,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = { 
+const userDatabase = { 
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
@@ -33,6 +33,16 @@ const users = {
 }
 
 /* FUNCTIONS */
+
+//Checks for existing user
+const existingUser = function(email, userDatabase) {
+  for (const user in userDatabase) {
+    if (userDatabase[user].email === email) {
+      return true;
+    }
+  }
+  return false;
+};
 
 //Creates a random string, used to create short URLs/userIDs
 const generateRandomString = function() {
@@ -153,6 +163,19 @@ app.post("/logout", (req, res) => {
 app.get("/registration", (req,res) => {
   let templateVars = { username: req.cookies["username"] };
   res.render("urls_registration", templateVars);
+});
+
+app.post("/registration", (req, res) => {
+  const regEmail = req.body.email;
+  const regPassword = req.body.password;
+
+  if (!regEmail || ! regPassword) {
+    res.send(400, "Please include valid email and/or password.")
+  }
+
+  if (existingUser(regEmail)) {
+    res.send(400, "Exiating user. Please use a different email address.")
+  }
 });
 
 
