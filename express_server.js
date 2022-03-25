@@ -3,7 +3,7 @@ const app = express();
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
-const bcrypt = require("bcrypt");
+const bcryptjs = require("bcryptjs");
 
 const PORT = 8080; // default port 8080
 
