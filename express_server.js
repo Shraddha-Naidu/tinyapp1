@@ -64,6 +64,22 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+//Retrieves URL index(response to /urls)
+app.get("/urls", (req, res) => {
+  let templateVars = { urls: urlDatabase };
+  res.render('urls_index', templateVars);
+});
+
+//Route to new URLs
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
+app.post("/urls/new", (req, res) => {
+  console.log(req.body);
+  res.send("Ok");
+});
+
 //Retrieves urls
 app.get("/urls", (req, res) => {
   const longURL = req.body.longURL;
