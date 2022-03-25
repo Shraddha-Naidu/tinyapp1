@@ -134,7 +134,7 @@ app.post("/urls/:shortURL", (req, res) => {
     delete urlDatabase[req.params.shortURL];
     res.redirect(`/urls/${shortURL}`);
   } else {
-    res.send(400, "Can only be deleted by User.")
+    res.status(400).send("Can only be deleted by User.")
   }
 });
 
@@ -166,11 +166,11 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
 
     if (!existingUser(email)) {
-    res.send(403, "User does not exist. Please try again.")
+    res.status(403).send("User does not exist. Please try again.")
   } else {
     const userID = existingUser(email);
     if (!bcrypt.compareSync(password, userDatabase[userID].password)) {
-      res.send(403, "The email address or password entered is incorrect. Please try again.")
+      res.status(403).send("The email address or password entered is incorrect. Please try again.")
     } else {
       res.cookie("user_id", userID);
       res.redirect("/urls")
@@ -195,11 +195,11 @@ app.post("/registration", (req, res) => {
   const regPassword = req.body.password;
 
   if (!regEmail || ! regPassword) {
-    res.send(400, "Please include valid email and/or password.")
+    res.status(400).send("Please include valid email and/or password.")
   }
 
   if (existingUser(regEmail)) {
-    res.send(400, "Existing user. Please use a different email address.")
+    res.status(400).send("Existing user. Please use a different email address.")
   } else {
     const newUserID = generateRandomString();
     userDatabase[newUserID] = {
@@ -219,6 +219,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[req.params.shortURL];
     res.redirect('/urls');
   } else {
-    res.send(400, "Can only be deleted by User.")
+    res.status(400).send("Can only be deleted by User.")
   }
 });
