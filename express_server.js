@@ -22,7 +22,7 @@ const urlDatabase = {
 };
 
 const userDatabase = { 
-  "userRandomID": {
+  /* "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
     password: "purple"
@@ -31,7 +31,7 @@ const userDatabase = {
     id: "user2RandomID", 
     email: "user2@example.com", 
     password: "dishwasher"
-  }
+  } */
 }
 
 /* FUNCTIONS */
@@ -200,6 +200,15 @@ app.post("/registration", (req, res) => {
 
   if (existingUser(regEmail)) {
     res.send(400, "Existing user. Please use a different email address.")
+  } else {
+    const newUserID = generateRandomString();
+    userDatabase[newUserID] = {
+      id: newUserID,
+      email: regEmail,
+      password: regPassword
+    }
+    res.cookie('user_id', newUserID);
+    res.redirect("/urls");
   }
 });
 
