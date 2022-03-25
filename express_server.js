@@ -12,23 +12,23 @@ app.use(cookieParser());
 /* MIDDLEWARE */
 app.use(morgan("combined"))
 
-/* VARIABLE */
+/* OBJECTS */
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL:"http://www.lighthouselabs.ca", userID: "userRandomID"},
+  "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID"}
 };
 
 const userDatabase = { 
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: "purple"
   },
  "user2RandomID": {
     id: "user2RandomID", 
     email: "user2@example.com", 
-    password: "dishwasher-funk"
+    password: "dishwasher"
   }
 }
 
@@ -70,11 +70,6 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-//Server endpoint
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
 //Retrieves URL index(response to /urls)
 app.get("/urls", (req, res) => {
   let templateVars = {
@@ -87,7 +82,11 @@ app.get("/urls", (req, res) => {
 //Route to new URLs
 app.get("/urls/new", (req, res) => {
   let templateVars = { user: userDatabase[req.cookies["user_id"]] };
-  res.render('urls_new', templateVars);
+  if (!req.cookies["user_id"]) {
+    res.redirect("/login");
+  } else {
+    res.render("urls_new", templateVars);
+  }
 });
 
 app.post("/urls/new", (req, res) => {
@@ -201,7 +200,6 @@ app.post("/registration", (req, res) => {
     res.send(400, "Existing user. Please use a different email address.")
   }
 });
-
 
 
 //Removes deleted URL
