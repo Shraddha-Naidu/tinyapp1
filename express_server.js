@@ -103,17 +103,19 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); 
-  res.send("Ok");
+  const longURL = req.body.longURL;
+  const userID = req.cookies["user_id"];
+  const shortURL = generatedRandomString();
+  urlDatabase[shortURL] = { longURL, userID };
+  res.redirect(`/urls/${shortURL}`);
 });
 
 //Retrieves short urls
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { 
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
     user: userDatabase[req.cookies["user_id"]]
-  
   };
   res.render("urls_show", templateVars);
 });
