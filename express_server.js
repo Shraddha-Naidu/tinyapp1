@@ -43,7 +43,7 @@ app.get("/", (req, res) => {
 });
 
 
-//Retrieves URL index(response to /urls)
+//Retrieves URL index(response to /urls) for user
 app.get("/urls", (req, res) => {
   let templateVars = {
     userUrls: urlDatabase,
@@ -60,11 +60,6 @@ app.get("/urls/new", (req, res) => {
   } else {
     res.render("urls_new", templateVars);
   }
-});
-
-app.post("/urls/new", (req, res) => {
-  console.log(req.body);
-  res.send("Ok");
 });
 
 //Retrieves urls
@@ -109,15 +104,6 @@ app.post("/urls/:shortURL", (req, res) => {
   }
 });
 
-//Route to new URLs
-app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
-});
-
-app.post("/urls/new", (req, res) => {
-  console.log(req.body);
-  res.send("Ok");
-});
 
 app.post("/urls/:id", (req, res) => {
   console.log(req.body);
