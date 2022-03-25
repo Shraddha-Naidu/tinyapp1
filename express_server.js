@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const bcrypt = require("bcrypt");
 
 const PORT = 8080; // default port 8080
@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
 /* MIDDLEWARE */
-app.use(morgan("combined"))
+app.use(morgan("combined"));
 
 /* OBJECTS */
 
@@ -21,18 +21,18 @@ const urlDatabase = {
   "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID"}
 };
 
-const userDatabase = { 
+const userDatabase = {
   /* "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple"
   },
  "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher"
   } */
-}
+};
 
 /* FUNCTIONS */
 
@@ -48,10 +48,10 @@ const existingUser = function(email, userDatabase) {
 
 //Creates a random string, used to create short URLs/userIDs
 const generateRandomString = function() {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz"
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
   let randomString = "";
   while (randomString.length < 6) {
-    randomString = chars[Math.floor(Math.random() * chars.length)]
+    randomString = chars[Math.floor(Math.random() * chars.length)];
   }
   return randomString;
 };
@@ -107,15 +107,15 @@ app.get("/urls", (req, res) => {
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const userID = req.cookies["user_id"];
-  const shortURL = generatedRandomString();
+  const shortURL = generateRandomString();
   urlDatabase[shortURL] = { longURL, userID };
   res.redirect(`/urls/${shortURL}`);
 });
 
 //Retrieves short urls
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { 
-    shortURL: req.params.shortURL, 
+  let templateVars = {
+    shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
     user: userDatabase[req.cookies["user_id"]]
   };
@@ -134,7 +134,7 @@ app.post("/urls/:shortURL", (req, res) => {
     delete urlDatabase[req.params.shortURL];
     res.redirect(`/urls/${shortURL}`);
   } else {
-    res.status(400).send("Can only be deleted by User.")
+    res.status(400).send("Can only be deleted by User.");
   }
 });
 
@@ -165,15 +165,15 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-    if (!existingUser(email)) {
-    res.status(403).send("User does not exist. Please try again.")
+  if (!existingUser(email)) {
+    res.status(403).send("User does not exist. Please try again.");
   } else {
     const userID = existingUser(email);
     if (!bcrypt.compareSync(password, userDatabase[userID].password)) {
-      res.status(403).send("The email address or password entered is incorrect. Please try again.")
+      res.status(403).send("The email address or password entered is incorrect. Please try again.");
     } else {
       res.cookie("user_id", userID);
-      res.redirect("/urls")
+      res.redirect("/urls");
     }
   }
 });
@@ -195,18 +195,18 @@ app.post("/registration", (req, res) => {
   const regPassword = req.body.password;
 
   if (!regEmail || ! regPassword) {
-    res.status(400).send("Please include valid email and/or password.")
+    res.status(400).send("Please include valid email and/or password.");
   }
 
   if (existingUser(regEmail)) {
-    res.status(400).send("Existing user. Please use a different email address.")
+    res.status(400).send("Existing user. Please use a different email address.");
   } else {
     const newUserID = generateRandomString();
     userDatabase[newUserID] = {
       id: newUserID,
       email: regEmail,
       password: bcrypt.hashSync(regPassword, 10)
-    }
+    };
     res.cookie('user_id', newUserID);
     res.redirect("/urls");
   }
@@ -219,6 +219,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[req.params.shortURL];
     res.redirect('/urls');
   } else {
-    res.status(400).send("Can only be deleted by User.")
+    res.status(400).send("Can only be deleted by User.");
   }
 });
