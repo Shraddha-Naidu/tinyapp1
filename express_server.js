@@ -38,7 +38,7 @@ const userDatabase = {
 const existingUser = function(email, userDatabase) {
   for (const user in userDatabase) {
     if (userDatabase[user].email === email) {
-      return true;
+      return userDatabase[user].id;
     }
   }
   return false;
@@ -153,15 +153,33 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 })
 
 //LOGIN route
+app.get("/login", (req, res) => {
+  let templateVars = {
+    user: userDatabase[req.cookies["user_id"]],
+  };
+  res.render("urls_login", templateVars);
+});
+
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie("username", username);
-  res.redirect("/urls");
+  const email = req.body.email;
+  const password = req.body.password;
+
+    if (!existingUser(email)) {
+    res.send(403, "User does not exist. Please try again.")
+  } else {
+    const userID = existingUser(email);
+    if (userDatabase[userID].password !== password) {
+      res.send(403, "The email address or password entered is incorrect. Please try again.")
+    } else {
+      res.cookie("user_id", userID);
+      res.redirect("/urls")
+    }
+  }
 });
 
 //LOGOUT
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -180,7 +198,7 @@ app.post("/registration", (req, res) => {
   }
 
   if (existingUser(regEmail)) {
-    res.send(400, "Exiating user. Please use a different email address.")
+    res.send(400, "Existing user. Please use a different email address.")
   }
 });
 
