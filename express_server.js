@@ -149,6 +149,12 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
+//REGISTRATION
+app.get("/registration", (req,res) => {
+  let templateVars = { username: req.cookies["username"] };
+  res.render("urls_registration", templateVars);
+});
+
 
 
 //Removes deleted URL
