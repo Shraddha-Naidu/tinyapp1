@@ -8,6 +8,7 @@ const bcryptjs = require("bcryptjs");
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
+app.use(morgan("combined"));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: "session",
@@ -15,15 +16,9 @@ app.use(cookieSession({
   maxAge: 48 * 60 * 60 * 1000,
 }));
 
-/* MIDDLEWARE */
-app.use(morgan("combined"));
-
 /* OBJECTS */
 
-const urlDatabase = {
-  "b2xVn2": { longURL:"http://www.lighthouselabs.ca", userID: "userRandomID"},
-  "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID"}
-};
+const urlDatabase = {};
 
 const userDatabase = {};
 
@@ -37,19 +32,21 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+
+//LANDING PAGE
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login")
+  }
 });
 
-//HTML test code
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
 
 //Retrieves URL index(response to /urls)
 app.get("/urls", (req, res) => {
   let templateVars = {
-    urls: urlDatabase,
+    userUrls: urlDatabase,
     user: userDatabase[req.session.user_id]
   };
   res.render('urls_index', templateVars);
