@@ -169,7 +169,7 @@ app.post("/login", (req, res) => {
     res.send(403, "User does not exist. Please try again.")
   } else {
     const userID = existingUser(email);
-    if (userDatabase[userID].password !== password) {
+    if (!bcrypt.compareSync(password, userDatabase[userID].password)) {
       res.send(403, "The email address or password entered is incorrect. Please try again.")
     } else {
       res.cookie("user_id", userID);
@@ -205,7 +205,7 @@ app.post("/registration", (req, res) => {
     userDatabase[newUserID] = {
       id: newUserID,
       email: regEmail,
-      password: regPassword
+      password: bcrypt.hashSync(regPassword, 10)
     }
     res.cookie('user_id', newUserID);
     res.redirect("/urls");
