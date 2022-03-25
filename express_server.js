@@ -110,6 +110,18 @@ app.post("/urls/:id", (req, res) => {
   res.send("Ok");
 });
 
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect('/urls');
+})
+
+//Login route
+app.post("/login", (req, res) => {
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
+});
+
 
 
 //Removes deleted URL
