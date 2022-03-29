@@ -30,7 +30,7 @@ const { existingUser, generateRandomString, existingUserCookie } = require("./he
 
 //LANDING PAGE
 app.get("/", (req, res) => {
-  if (req.session.user_id) {
+  if (existingUserCookie(req.session.user_id)) {
     res.redirect("/urls");
   } else {
     res.redirect("/login")
@@ -123,7 +123,7 @@ app.post("/login", (req, res) => {
     res.status(403).send("User does not exist. Please try again.");
   } else {
     const userID = existingUser(email);
-    if (!bcrypt.compareSync(password, userDatabase[userID].password)) {
+    if (!bcryptjs.compareSync(password, userDatabase[userID].password)) {
       res.status(403).send("The email address or password entered is incorrect. Please try again.");
     } else {
       res.session.user_id =  userID;
@@ -152,18 +152,16 @@ app.post("/registration", (req, res) => {
   const regEmail = req.body.email;
   const regPassword = req.body.password;
 
-  if (!regEmail || ! regPassword) {
+  if (!regEmail || !regPassword) {
     res.status(400).send("Please include valid email and/or password.");
-  }
-
-  if (existingUser(regEmail)) {
+  } else if (existingUser(regEmail, userDatabase)) {
     res.status(400).send("Existing user. Please use a different email address.");
   } else {
     const newUserID = generateRandomString();
     userDatabase[newUserID] = {
       id: newUserID,
       email: regEmail,
-      password: bcrypt.hashSync(regPassword, 10)
+      password: bcryptjs.hashSync(regPassword, 10)
     };
     req.session.user_id = newUserID;
     res.redirect("/urls");
