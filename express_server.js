@@ -24,7 +24,7 @@ const userDatabase = {};
 
 /* FUNCTIONS */
 
-const { existingUser, generateRandomString, existingUserCookie } = require("./helpers");
+const { existingUser, generateRandomString, existingUserCookie, userURL } = require("./helpers");
 
 /* ROUTES */
 
@@ -40,10 +40,23 @@ app.get("/", (req, res) => {
 //Retrieves URL index(response to /urls) for user
 app.get("/urls", (req, res) => {
   let templateVars = {
-    userUrls: urlDatabase,
-    user: userDatabase[req.session.user_id]
+    user: users[req.session.user_id],
+    urls: userURL(req.session.user_id, urlDatabase)
   };
-  res.render('urls_index', templateVars);
+  res.render("urls_index", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  if (req.session.user_id) {
+    const shortURL = generateRandomString();
+    urlDatabase[shortURL] = {
+      longURL: req.body.longURL,
+      userID: req.session.user_id,
+    };
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.status(401).send("Please create account or login to access.");
+  }
 });
 
 //Route to new URLs
@@ -56,21 +69,9 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-//Retrieves urls
-app.get("/urls", (req, res) => {
-  const longURL = req.body.longURL;
-  const shortURL = generateRandomString();
-  urlDatabase[shortURL] = longURL;
-  res.redirect("/urls/${shortURL}");
-});
 
-app.post("/urls", (req, res) => {
-  const longURL = req.body.longURL;
-  const userID = req.session.user_id;
-  const shortURL = generateRandomString();
-  urlDatabase[shortURL] = { longURL, userID };
-  res.redirect(`/urls/${shortURL}`);
-});
+
+
 
 //Retrieves short urls
 app.get("/urls/:shortURL", (req, res) => {
