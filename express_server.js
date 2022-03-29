@@ -24,14 +24,9 @@ const userDatabase = {};
 
 /* FUNCTIONS */
 
-const { existingUser, generateRandomString } = require("./helpers");
+const { existingUser, generateRandomString, existingUserCookie } = require("./helpers");
 
 /* ROUTES */
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
 
 //LANDING PAGE
 app.get("/", (req, res) => {
@@ -41,7 +36,6 @@ app.get("/", (req, res) => {
     res.redirect("/login")
   }
 });
-
 
 //Retrieves URL index(response to /urls) for user
 app.get("/urls", (req, res) => {
@@ -104,7 +98,6 @@ app.post("/urls/:shortURL", (req, res) => {
   }
 });
 
-
 app.post("/urls/:id", (req, res) => {
   console.log(req.body);
   res.send("Ok");
@@ -112,10 +105,14 @@ app.post("/urls/:id", (req, res) => {
 
 //LOGIN route
 app.get("/login", (req, res) => {
-  let templateVars = {
-    user: userDatabase[req.session.user_id],
-  };
-  res.render("urls_login", templateVars);
+  if (existingUserCookie(req.session.user_id, userDatabase)) {
+    res.redirect("/urls");
+  } else {
+    let templateVars = {
+      user: userDatabase[req.session.user_id],
+    };
+    res.render("urls_login", templateVars);
+  }
 });
 
 app.post("/login", (req, res) => {
@@ -143,8 +140,12 @@ app.post("/logout", (req, res) => {
 
 //REGISTRATION
 app.get("/registration", (req,res) => {
-  let templateVars = { user: userDatabase[req.session.user_id] };
-  res.render("urls_registration", templateVars);
+  if (existingUserCookie(req.session.user_id, userDatabase)) {
+  res.redirect("/urls");
+  } else {
+  let templateVars = { user: userDatabase[req.session.user_id]};
+    res.render("urls_registration", templateVars);
+  }
 });
 
 app.post("/registration", (req, res) => {
@@ -178,4 +179,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   } else {
     res.status(400).send("Can only be deleted by User.");
   }
+});
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });

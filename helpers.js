@@ -18,8 +18,19 @@ const generateRandomString = function() {
   return randomString;
 };
 
+//Checks existing user with corresponding cookie
+const existingUserCookie = function(cookie, userDatabase) {
+  for (const user in userDatabase) {
+    if (cookie === user) {
+      return userDatabase[user].id;
+    }
+  }
+  return false;
+}
+
 module.exports = {
   generateRandomString,
-  existingUser
+  existingUser,
+  existingUserCookie
 };
 
