@@ -39,7 +39,7 @@ app.get("/", (req, res) => {
 
 //Retrieves URL index(response to /urls) for user
 app.get("/urls", (req, res) => {
-  let templateVars = {
+  const templateVars = {
     user: userDatabase[req.session.user_id],
     urls: userURL(req.session.user_id, urlDatabase)
   };
@@ -71,12 +71,16 @@ app.get("/urls/new", (req, res) => {
 
 //Retrieves short url
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL].longURL,
-    user: userDatabase[req.session.user_id]
-  };
-  res.render("urls_show", templateVars);
+  if (urlDatabase[req.params.shortURL]) {
+    const templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL].longURL,
+      user: userDatabase[req.session.user_id]
+    }
+    res.render("urls_show", templateVars);
+  }else {
+    res.status(404).send("The short URL trying to be accessed does not correspond with a long URL.")
+  }
 });
 
 app.post("/urls/:shortURL", (req, res) => {
@@ -92,13 +96,28 @@ app.post("/urls/:shortURL", (req, res) => {
 
 //Provides access to actual link
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
+  if (urlDatabase[req.params.shortURL]) {
+    const longURL = urlDatabase[req.params.shortURL].longURL;
+    if (longURL === undefined) {
+      res.status(302);
+    } else {
+      req.redirect(longURL)
+    }
+  } else {
+    res.status(404).send("The short URL trying to be accessed does not correspond with a long URL.")
+  }
 });
 
 app.post("/urls/:id", (req, res) => {
-  console.log(req.body);
-  res.send("Ok");
+  const userID = req.session.user_id;
+  const userUrls = userURL(userID, urlDatabase);
+  if (Object.keys(userUrls).includes(req.params.id)) {
+    const shortURL = req.params.id;
+    urlDatabase[shortURL].longURL = req.body.newURL;
+    res.redirect('/urls');
+  } else {
+    res.status(401).send("URLs cannot be edited unless logged in.");
+  }
 });
 
 //LOGIN route
@@ -139,9 +158,11 @@ app.post("/logout", (req, res) => {
 //REGISTRATION
 app.get("/registration", (req,res) => {
   if (existingUserCookie(req.session.user_id, userDatabase)) {
-  res.redirect("/urls");
+    res.redirect("/urls");
   } else {
-  let templateVars = { user: userDatabase[req.session.user_id]};
+    let templateVars = {
+      user: userDatabase[req.session.user_id],
+    };
     res.render("urls_registration", templateVars);
   }
 });
@@ -168,12 +189,14 @@ app.post("/registration", (req, res) => {
 
 //Removes deleted URL
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL;
-  if (req.session["user_id"] === urlDatabase[shortURL].userID) {
-    delete urlDatabase[req.params.shortURL];
+  const userID = req.session.user_id;
+  const userUrls = userURL(userID, urlDatabase);
+  if (Object.keys(userUrls).includes(req.params.shortURL)) {
+    const shortURL = req.params.shortURL;
+    delete urlDatabase[shortURL];
     res.redirect('/urls');
   } else {
-    res.status(400).send("Can only be deleted by User.");
+    res.status(401).send("URLs cannot be deleted unless logged in.");
   }
 });
 
