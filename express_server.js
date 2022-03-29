@@ -12,8 +12,8 @@ app.use(morgan("combined"));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: "session",
-  keys: "SHRAZ-0902",
-  maxAge: 48 * 60 * 60 * 1000,
+  keys: ["SHRAZ-0902", "Dinosaur"]
+  //maxAge: 48 * 60 * 60 * 1000,
 }));
 
 /* OBJECTS */
@@ -135,11 +135,11 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const userID = existingUser(email, userDatabase);
 
-  if (!existingUser(email)) {
+  if (!userID) {
     res.status(403).send("User does not exist. Please try again.");
   } else {
-    const userID = existingUser(email);
     if (!bcryptjs.compareSync(password, userDatabase[userID].password)) {
       res.status(403).send("The email address or password entered is incorrect. Please try again.");
     } else {
@@ -168,7 +168,6 @@ app.get("/registration", (req,res) => {
   }
 });
 
-
 app.post("/registration", (req, res) => {
   const regEmail = req.body.email;
   const regPassword = req.body.password;
@@ -178,12 +177,15 @@ app.post("/registration", (req, res) => {
   } else if (existingUser(regEmail, userDatabase)) {
     res.status(400).send("Existing user. Please use a different email address.");
   } else {
-    let newUser = generateRandomString();
-    userDatabase[user_id] = {
+    console.log("registering")
+    const newUser = generateRandomString();
+    console.log("new User:" + newUser)
+    userDatabase[newUser] = {
       id: newUser,
       email: regEmail,
       password: bcryptjs.hashSync(regPassword, 10)
     };
+    console.log("userDatabase")
     req.session.user_id = newUser;
     res.redirect("/urls");
   }

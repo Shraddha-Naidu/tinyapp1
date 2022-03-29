@@ -10,11 +10,13 @@ const existingUser = function(email, userDatabase) {
 
 //Creates a random string, used to create short URLs/userIDs
 const generateRandomString = function() {
+  console.log("generating");
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
   let randomString = "";
-  while (randomString.length < 6) {
-    randomString = chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 0; i < 6; i++) {
+    randomString += chars[Math.floor(Math.random() * chars.length)];
   }
+  console.log(`Random Strong: ${randomString}`);
   return randomString;
 };
 
