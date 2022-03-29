@@ -178,13 +178,13 @@ app.post("/registration", (req, res) => {
   } else if (existingUser(regEmail, userDatabase)) {
     res.status(400).send("Existing user. Please use a different email address.");
   } else {
-    let user_id = generateRandomString();
+    let newUser = generateRandomString();
     userDatabase[user_id] = {
-      id: user_id,
+      id: newUser,
       email: regEmail,
       password: bcryptjs.hashSync(regPassword, 10)
     };
-    req.session.user_id = user_id;
+    req.session.user_id = newUser;
     res.redirect("/urls");
   }
 });
