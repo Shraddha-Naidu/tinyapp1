@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
 //Retrieves URL index(response to /urls) for user
 app.get("/urls", (req, res) => {
   let templateVars = {
-    user: users[req.session.user_id],
+    user: userDatabase[req.session.user_id],
     urls: userURL(req.session.user_id, urlDatabase)
   };
   res.render("urls_index", templateVars);
@@ -61,19 +61,15 @@ app.post("/urls", (req, res) => {
 
 //Route to new URLs
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user: userDatabase[req.session.user_id] };
-  if (!req.session.user_id) {
+  if (!existingUserCookie(req.session.user_id, userDatabase)){
     res.redirect("/login");
   } else {
-    res.render("urls_new", templateVars);
+    let templateVars = { user: userDatabase[req.session.user_id] };
   }
-});
+    res.render("urls_new", templateVars);
+  });
 
-
-
-
-
-//Retrieves short urls
+//Retrieves short url
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
@@ -81,11 +77,6 @@ app.get("/urls/:shortURL", (req, res) => {
     user: userDatabase[req.session.user_id]
   };
   res.render("urls_show", templateVars);
-});
-
-app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
 });
 
 app.post("/urls/:shortURL", (req, res) => {
@@ -97,6 +88,12 @@ app.post("/urls/:shortURL", (req, res) => {
   } else {
     res.status(400).send("Can only be deleted by User.");
   }
+});
+
+//Provides access to actual link
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+  res.redirect(longURL);
 });
 
 app.post("/urls/:id", (req, res) => {
