@@ -165,7 +165,7 @@ app.post("/registration", (req, res) => {
       email: regEmail,
       password: bcrypt.hashSync(regPassword, 10)
     };
-    resq.sesion.user_id = newUserID;
+    req.session.user_id = newUserID;
     res.redirect("/urls");
   }
 });
