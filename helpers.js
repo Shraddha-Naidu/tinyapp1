@@ -28,9 +28,21 @@ const existingUserCookie = function(cookie, userDatabase) {
   return false;
 }
 
+//Returns shortURLs specific to user
+const userURL = function(ID, urlDatabase) {
+  const assignedURLS = {};
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === ID) {
+      assignedURLS[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return assignedURLS;
+};
+
 module.exports = {
   generateRandomString,
   existingUser,
-  existingUserCookie
+  existingUserCookie,
+  userURL
 };
 
