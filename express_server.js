@@ -157,15 +157,17 @@ app.post("/logout", (req, res) => {
 
 //REGISTRATION
 app.get("/registration", (req,res) => {
-  if (existingUserCookie(req.session.user_id, userDatabase)) {
+  const templateVars = {
+    user: userDatabase[req.session.user_id]
+  };
+
+  if (templateVars.user) {
     res.redirect("/urls");
   } else {
-    let templateVars = {
-      user: userDatabase[req.session.user_id],
-    };
     res.render("urls_registration", templateVars);
   }
 });
+
 
 app.post("/registration", (req, res) => {
   const regEmail = req.body.email;
@@ -176,7 +178,7 @@ app.post("/registration", (req, res) => {
   } else if (existingUser(regEmail, userDatabase)) {
     res.status(400).send("Existing user. Please use a different email address.");
   } else {
-    const newUserID = generateRandomString();
+    let newUserID = generateRandomString();
     userDatabase[newUserID] = {
       id: newUserID,
       email: regEmail,
