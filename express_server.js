@@ -28,12 +28,12 @@ const { existingUser, generateRandomString, existingUserCookie, userURL } = requ
 
 /* ROUTES */
 
-//LANDING PAGE
+//LANDING PAGE --> redirects to urls if logged in, otherwise to login page
 app.get("/", (req, res) => {
   if (existingUserCookie(req.session.user_id)) {
     res.redirect("/urls");
   } else {
-    res.redirect("/login")
+    res.redirect("/login");
   }
 });
 
@@ -46,6 +46,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//Adds new URL to database and redirects to shortURLs
 app.post("/urls", (req, res) => {
   if (req.session.user_id) {
     const shortURL = generateRandomString();
@@ -59,9 +60,9 @@ app.post("/urls", (req, res) => {
   }
 });
 
-//Route to new URLs
+//Route to new URLs for logged in users
 app.get("/urls/new", (req, res) => {
-  if (!existingUserCookie(req.session.user_id, userDatabase)){
+  if (!existingUserCookie(req.session.user_id, userDatabase)) {
     res.redirect("/login");
   } else {
     let templateVars = { user: userDatabase[req.session.user_id] };
@@ -69,42 +70,41 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-//Retrieves short url
+//Retrieves short URLs for logged in user
 app.get("/urls/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
     const templateVars = {
       shortURL: req.params.shortURL,
       longURL: urlDatabase[req.params.shortURL].longURL,
       user: userDatabase[req.session.user_id]
-    }
+    };
     res.render("urls_show", templateVars);
-  }else {
-    res.status(404).send("The short URL trying to be accessed does not correspond with a long URL.")
+  } else {
+    res.status(404).send("The short URL trying to be accessed does not correspond with a long URL.");
   }
 });
 
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = req.body.longURL;
   if (req.session.user_id === urlDatabase[shortURL].userID) {
-    delete urlDatabase[req.params.shortURL];
+    urlDatabase[shortURL].longURL = req.body.longURL
     res.redirect(`/urls/${shortURL}`);
   } else {
     res.status(400).send("Can only be deleted by User.");
   }
 });
 
-//Provides access to actual link
+//Provides access to actual link (long URL)
 app.get("/u/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
     const longURL = urlDatabase[req.params.shortURL].longURL;
     if (longURL === undefined) {
       res.status(302);
     } else {
-      res.redirect(longURL)
+      res.redirect(longURL);
     }
   } else {
-    res.status(404).send("The short URL trying to be accessed does not correspond with a long URL.")
+    res.status(404).send("The short URL trying to be accessed does not correspond with a long URL.");
   }
 });
 
@@ -177,15 +177,12 @@ app.post("/registration", (req, res) => {
   } else if (existingUser(regEmail, userDatabase)) {
     res.status(400).send("Existing user. Please use a different email address.");
   } else {
-    console.log("registering")
     const newUser = generateRandomString();
-    console.log("new User:" + newUser)
     userDatabase[newUser] = {
       id: newUser,
       email: regEmail,
       password: bcryptjs.hashSync(regPassword, 10)
     };
-    console.log("userDatabase")
     req.session.user_id = newUser;
     res.redirect("/urls");
   }
