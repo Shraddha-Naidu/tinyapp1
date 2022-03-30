@@ -65,9 +65,9 @@ app.get("/urls/new", (req, res) => {
     res.redirect("/login");
   } else {
     let templateVars = { user: userDatabase[req.session.user_id] };
-  }
     res.render("urls_new", templateVars);
-  });
+  }
+});
 
 //Retrieves short url
 app.get("/urls/:shortURL", (req, res) => {
@@ -101,7 +101,7 @@ app.get("/u/:shortURL", (req, res) => {
     if (longURL === undefined) {
       res.status(302);
     } else {
-      req.redirect(longURL)
+      res.redirect(longURL)
     }
   } else {
     res.status(404).send("The short URL trying to be accessed does not correspond with a long URL.")
