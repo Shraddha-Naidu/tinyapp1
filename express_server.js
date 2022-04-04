@@ -30,10 +30,10 @@ const { existingUser, generateRandomString, existingUserCookie, userURL } = requ
 
 //LANDING PAGE --> redirects to urls if logged in, otherwise to login page
 app.get("/", (req, res) => {
-  if (existingUserCookie(req.session.user_id)) {
-    res.redirect("/urls");
-  } else {
+  if (!userDatabase(req.session.user_id)) {
     res.redirect("/login");
+  } else {
+    res.redirect("/urls");
   }
 });
 
