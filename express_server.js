@@ -30,7 +30,7 @@ const { existingUser, generateRandomString, existingUserCookie, userURL } = requ
 
 //LANDING PAGE --> redirects to urls if logged in, otherwise to login page
 app.get("/", (req, res) => {
-  if (!userDatabase(req.session.user_id)) {
+  if (!userDatabase[req.session.user_id]) {
     res.redirect("/login");
   } else {
     res.redirect("/urls");
@@ -139,15 +139,13 @@ app.post("/login", (req, res) => {
 
   if (!userID) {
     res.status(403).send("User does not exist. Please try again.");
+  } else if (!bcryptjs.compareSync(password, userDatabase[userID].password)) {
+    res.status(403).send("The email address or password entered is incorrect. Please try again.");
   } else {
-    if (!bcryptjs.compareSync(password, userDatabase[userID].password)) {
-      res.status(403).send("The email address or password entered is incorrect. Please try again.");
-    } else {
-      res.session.user_id =  userID;
+      res.session.user_id = userID;
       res.redirect("/urls");
     }
-  }
-});
+  });
 
 //LOGOUT
 app.post("/logout", (req, res) => {
@@ -187,6 +185,23 @@ app.post("/registration", (req, res) => {
     res.redirect("/urls");
   }
 });
+
+
+app.post("/urls/:shortURL/edit", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = req.params.longURL;
+
+  if (!userDatabase[req.session.user_id]) {
+    res.status(400).send("Please login to access URLs.");
+  } else if (userDatabase[req.session.user_id].id !== urlDatabase[shortURL].userID) {
+    res.status(400).send("No access to given URL.");
+  } else {
+    // edits the longURL for the given ID
+    urlDatabase[shortURL].longURL = longURL;
+    res.redirect("/urls");
+  }
+});
+
 
 //Removes deleted URL
 app.post("/urls/:shortURL/delete", (req, res) => {
