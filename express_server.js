@@ -19,7 +19,6 @@ app.use(cookieSession({
 /* OBJECTS */
 
 const urlDatabase = {};
-
 const userDatabase = {};
 
 /* FUNCTIONS */
@@ -35,6 +34,72 @@ app.get("/", (req, res) => {
   } else {
     res.redirect("/urls");
   }
+});
+
+//REGISTRATION
+app.get("/registration", (req,res) => {
+  const templateVars = {
+    user: userDatabase[req.session.user_id]
+  };
+
+  if (templateVars.user) {
+    res.redirect("/urls");
+  } else {
+    res.render("urls_registration", templateVars);
+  }
+});
+
+app.post("/registration", (req, res) => {
+  const regEmail = req.body.email;
+  const regPassword = req.body.password;
+
+  if (!regEmail || !regPassword) {
+    res.status(400).send("Please include valid email and/or password.");
+  } else if (existingUser(regEmail, userDatabase)) {
+    res.status(400).send("Existing user. Please use a different email address.");
+  } else {
+    const newUser = generateRandomString();
+    userDatabase[newUser] = {
+      id: newUser,
+      email: regEmail,
+      password: bcryptjs.hashSync(regPassword, 10)
+    };
+    req.session.user_id = newUser;
+    res.redirect("/urls");
+  }
+});
+
+//LOGIN route
+app.get("/login", (req, res) => {
+  if (existingUserCookie(req.session.user_id, userDatabase)) {
+    res.redirect("/urls");
+  } else {
+    let templateVars = {
+      user: userDatabase[req.session.user_id],
+    };
+    res.render("urls_login", templateVars);
+  }
+});
+
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const userID = existingUser(email, userDatabase);
+
+  if (!userID) {
+    res.status(403).send("User does not exist. Please try again.");
+  } else if (!bcryptjs.compareSync(password, userDatabase[userID].password)) {
+    res.status(403).send("The email address or password entered is incorrect. Please try again.");
+  } else {
+      req.session.user_id = userID;
+      res.redirect("/urls");
+    }
+  });
+
+//LOGOUT
+app.post("/logout", (req, res) => {
+  req.session = null;
+  res.redirect("/");
 });
 
 //Retrieves URL index(response to /urls) for user
@@ -98,6 +163,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
     const longURL = urlDatabase[req.params.shortURL].longURL;
+    
     if (longURL === undefined) {
       res.status(302);
     } else {
@@ -120,87 +186,6 @@ app.post("/urls/:id", (req, res) => {
   }
 });
 
-//LOGIN route
-app.get("/login", (req, res) => {
-  if (existingUserCookie(req.session.user_id, userDatabase)) {
-    res.redirect("/urls");
-  } else {
-    let templateVars = {
-      user: userDatabase[req.session.user_id],
-    };
-    res.render("urls_login", templateVars);
-  }
-});
-
-app.post("/login", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
-  const userID = existingUser(email, userDatabase);
-
-  if (!userID) {
-    res.status(403).send("User does not exist. Please try again.");
-  } else if (!bcryptjs.compareSync(password, userDatabase[userID].password)) {
-    res.status(403).send("The email address or password entered is incorrect. Please try again.");
-  } else {
-      res.session.user_id = userID;
-      res.redirect("/urls");
-    }
-  });
-
-//LOGOUT
-app.post("/logout", (req, res) => {
-  req.session = null;
-  res.redirect("/urls");
-});
-
-//REGISTRATION
-app.get("/registration", (req,res) => {
-  const templateVars = {
-    user: userDatabase[req.session.user_id]
-  };
-
-  if (templateVars.user) {
-    res.redirect("/urls");
-  } else {
-    res.render("urls_registration", templateVars);
-  }
-});
-
-app.post("/registration", (req, res) => {
-  const regEmail = req.body.email;
-  const regPassword = req.body.password;
-
-  if (!regEmail || !regPassword) {
-    res.status(400).send("Please include valid email and/or password.");
-  } else if (existingUser(regEmail, userDatabase)) {
-    res.status(400).send("Existing user. Please use a different email address.");
-  } else {
-    const newUser = generateRandomString();
-    userDatabase[newUser] = {
-      id: newUser,
-      email: regEmail,
-      password: bcryptjs.hashSync(regPassword, 10)
-    };
-    req.session.user_id = newUser;
-    res.redirect("/urls");
-  }
-});
-
-
-app.post("/urls/:shortURL/edit", (req, res) => {
-  const shortURL = req.params.shortURL;
-  const longURL = req.params.longURL;
-
-  if (!userDatabase[req.session.user_id]) {
-    res.status(400).send("Please login to access URLs.");
-  } else if (userDatabase[req.session.user_id].id !== urlDatabase[shortURL].userID) {
-    res.status(400).send("No access to given URL.");
-  } else {
-    // edits the longURL for the given ID
-    urlDatabase[shortURL].longURL = longURL;
-    res.redirect("/urls");
-  }
-});
 
 
 //Removes deleted URL
